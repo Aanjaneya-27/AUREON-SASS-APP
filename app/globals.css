@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --obsidian: #08090b;
+  --graphite: #17191d;
+  --titanium: #b8bdc5;
+  --lime: #d9ff3f;
+  --background: #08090b;
+  --foreground: #b8bdc5;
+}
+
+@theme inline {
+  --color-obsidian: var(--obsidian);
+  --color-graphite: var(--graphite);
+  --color-titanium: var(--titanium);
+  --color-lime: var(--lime);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-cormorant);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--obsidian);
+  color: var(--titanium);
+  font-family: var(--font-outfit), sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--lime) 80%, transparent);
+  color: var(--obsidian);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
