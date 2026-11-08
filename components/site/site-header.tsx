@@ -79,14 +79,15 @@ export function SiteHeader() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Section observer for Home page to dynamically highlight Technology / Our Story
+  // Section observer for Home page to dynamically highlight Technology
   useEffect(() => {
     if (pathname !== "/") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveSection("");
       return;
     }
 
-    const sectionIds = ["story", "technology"];
+    const sectionIds = ["technology"];
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el));
@@ -98,8 +99,12 @@ export function SiteHeader() {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             setActiveSection(entry.target.id);
-            break;
+            return;
           }
+        }
+        // If technology is not intersecting and we are near the top, reset section
+        if (window.scrollY < 400 && !window.location.hash) {
+          setActiveSection("");
         }
       },
       {

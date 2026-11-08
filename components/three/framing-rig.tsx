@@ -29,6 +29,8 @@ export function FramingRig({
     const fitWidth = (radius * padding) / (halfHeight * aspect);
     const distance = Math.max(fitHeight, fitWidth);
 
+    // Mutating the R3F camera object is intentional and the correct pattern
+    // eslint-disable-next-line react-hooks/immutability
     cam.near = Math.max(distance / 100, 0.08);
     cam.far = Math.max(distance * 24, 40);
     cam.position.set(0, y, distance);

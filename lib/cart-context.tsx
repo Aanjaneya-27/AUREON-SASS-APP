@@ -34,36 +34,33 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "aureon_cart_state";
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  // Restore cart on client mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setItems(parsed);
-        }
-      }
-    } catch {
-      // Ignore storage errors
+function readStoredItems(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as unknown;
+      if (Array.isArray(parsed)) return parsed as CartItem[];
     }
-    setHydrated(true);
-  }, []);
+  } catch {
+    // ignore
+  }
+  return [];
+}
 
-  // Persist cart changes
+export function CartProvider({ children }: { children: ReactNode }) {
+  // Lazy initializer — no setState call inside a useEffect needed for hydration
+  const [items, setItems] = useState<CartItem[]>(readStoredItems);
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Persist cart changes after mount
   useEffect(() => {
-    if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch {
-      // Ignore storage errors
+      // ignore storage errors
     }
-  }, [items, hydrated]);
+  }, [items]);
 
   const totalCount = useMemo(
     () => items.reduce((sum, item) => sum + (item.quantity || 1), 0),
@@ -143,4 +140,3 @@ export function useCart(): CartContextValue {
   }
   return ctx;
 }
-
