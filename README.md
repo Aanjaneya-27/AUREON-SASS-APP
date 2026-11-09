@@ -21,4 +21,4 @@ Place real GLB models here (they are not included):
 
 - `public/models/aureon-headphones.glb`
 - `public
-Until those files exist, each canvas shows a precise fallback with the expected path. No fake 3D substitutes are rendered.
+Until those files exist, each canvas shows a precise fallbac
