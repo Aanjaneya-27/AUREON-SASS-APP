@@ -20,5 +20,4 @@ Open [http://localhost:3000](http://localhost:3000), then:
 Place real GLB models here (they are not included):
 
 - `public/models/aureon-headphones.glb`
-- `public
-Until those files exist, each canvas shows a precise fallbac
+
