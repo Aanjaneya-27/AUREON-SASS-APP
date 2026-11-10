@@ -19,5 +19,3 @@ Open [http://localhost:3000](http://localhost:3000), then:
 
 Place real GLB models here (they are not included):
 
-- `public/models/aureon-headphones.glb`
-
