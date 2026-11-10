@@ -17,5 +17,5 @@ Open [http://localhost:3000](http://localhost:3000), then:
 
 ## Required 3D files
 
-Place real GLB models here (they are not included):
+Place real GLB models here (they are not included)
 
