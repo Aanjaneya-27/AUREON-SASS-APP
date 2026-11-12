@@ -16,5 +16,3 @@ Open [http://localhost:3000](http://localhost:3000), then:
 - [http://localhost:3000/earbuds](http://localhost:3000/earbuds)
 
 ## Required 3D files
-
-Place real GLB models here
