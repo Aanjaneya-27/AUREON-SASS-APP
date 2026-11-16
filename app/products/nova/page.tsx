@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NovaProductViewerLazy } from "@/components/three/load-experiences";
 import { useCart } from "@/lib/cart-context";
 import { cn } from "@/lib/cn";
+import { getGsap } from "@/lib/gsap-client";
 import { NOVA_COLORS, type HeadphoneColor } from "@/lib/nova-colors";
 import { PRODUCTS } from "@/lib/product-models";
 
 type SpecTab = "acoustics" | "connectivity" | "power" | "craft" | "in_box";
 
 export default function NovaProductPage() {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [selectedColor, setSelectedColor] = useState<HeadphoneColor>(
     NOVA_COLORS[0],
   );
@@ -48,10 +50,137 @@ export default function NovaProductPage() {
     openCart();
   }, [addItem, openCart, product.category, quantity, selectedColor]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const page = pageRef.current;
+    if (!page) return;
+
+    const { gsap } = getGsap();
+
+    const ctx = gsap.context(() => {
+      // Hero entrance animations
+      gsap.fromTo(
+        '[data-gsap-nova="breadcrumb"]',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", delay: 0.1 },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="h1"]',
+        { opacity: 0, y: 30, scale: 1.03 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.9,
+          ease: "power3.out",
+          delay: 0.2,
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="price"]',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.3 },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="colors"]',
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.8, ease: "power3.out", delay: 0.4 },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="features"] > *',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          delay: 0.45,
+          stagger: 0.08,
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="cta"]',
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.5 },
+      );
+
+      // Scroll-triggered sections
+      gsap.fromTo(
+        '[data-gsap-nova="architecture"] > *',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: '[data-gsap-nova="architecture"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="specs"]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-nova="specs"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="inbox"]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-nova="inbox"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-nova="story"]',
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-nova="story"]',
+            start: "top 80%",
+          },
+        },
+      );
+    }, page);
+
+    return () => {
+      ctx.revert();
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-obsidian text-titanium selection:bg-lime/80 selection:text-obsidian">
+    <div
+      ref={pageRef}
+      className="min-h-screen bg-obsidian text-titanium selection:bg-lime/80 selection:text-obsidian"
+    >
       {/* Top Breadcrumb & Status */}
-      <div className="border-b border-white/6 pt-24 pb-4 md:pt-28">
+      <div
+        data-gsap-nova="breadcrumb"
+        className="border-b border-white/6 pt-24 pb-4 md:pt-28"
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 md:px-10">
           <nav
             aria-label="Breadcrumb"
@@ -143,6 +272,27 @@ export default function NovaProductPage() {
                 View Full-Screen 3D Studio →
               </Link>
             </div>
+
+            {/* Editorial View Reference Strip */}
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {["Front View", "Side Profile", "3/4 Angle", "Detail"].map(
+                (label, i) => (
+                  <div
+                    key={label}
+                    className="rounded border border-white/8 bg-graphite/30 py-3 text-center group hover:border-lime/40 transition-colors cursor-default"
+                  >
+                    <div className="h-6 w-6 mx-auto mb-2 rounded-full border border-white/15 bg-graphite/60 flex items-center justify-center">
+                      <span className="font-mono text-[8px] text-lime/80">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-titanium/50 group-hover:text-titanium/80 transition-colors">
+                      {label}
+                    </span>
+                  </div>
+                ),
+              )}
+            </div>
           </section>
 
           {/* Right Column: Product Information & Purchase (lg:col-span-5) */}
@@ -155,7 +305,10 @@ export default function NovaProductPage() {
               <p className="font-sans text-[11px] uppercase tracking-[0.38em] text-lime font-medium">
                 AUREON ATELIER · NO. 01
               </p>
-              <h1 className="mt-2 font-serif text-4xl text-white tracking-tight sm:text-5xl lg:text-6xl">
+              <h1
+                data-gsap-nova="h1"
+                className="mt-2 font-serif text-4xl text-white tracking-tight sm:text-5xl lg:text-6xl"
+              >
                 {product.name}
               </h1>
               <p className="mt-2 font-sans text-sm uppercase tracking-[0.28em] text-titanium/70">
@@ -165,7 +318,10 @@ export default function NovaProductPage() {
 
             {/* Rating & Reviews (Clearly marked demo content) */}
             <div className="mt-4 flex items-center gap-3 border-b border-white/8 pb-5">
-              <div className="flex text-lime text-sm tracking-widest" aria-label="5 star rating">
+              <div
+                className="flex text-lime text-sm tracking-widest"
+                aria-label="5 star rating"
+              >
                 ★★★★★
               </div>
               <span className="font-mono text-xs font-semibold text-white">
@@ -181,7 +337,10 @@ export default function NovaProductPage() {
             </div>
 
             {/* Price & Allocation Status */}
-            <div className="mt-6 flex flex-wrap items-baseline justify-between gap-3">
+            <div
+              data-gsap-nova="price"
+              className="mt-6 flex flex-wrap items-baseline justify-between gap-3"
+            >
               <div>
                 <p className="font-serif text-3xl text-white sm:text-4xl">
                   $1,250
@@ -208,7 +367,10 @@ export default function NovaProductPage() {
             </p>
 
             {/* Color Swatch Picker */}
-            <div className="mt-8 rounded-xl border border-white/8 bg-graphite/30 p-5">
+            <div
+              data-gsap-nova="colors"
+              className="mt-8 rounded-xl border border-white/8 bg-graphite/30 p-5"
+            >
               <div className="flex items-center justify-between">
                 <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-white">
                   Finish:{" "}
@@ -261,7 +423,10 @@ export default function NovaProductPage() {
             </div>
 
             {/* Key Acoustic Features Grid */}
-            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div
+              data-gsap-nova="features"
+              className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2"
+            >
               <div className="rounded-lg border border-white/6 bg-graphite/20 p-3.5">
                 <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-lime">
                   Active Noise Cancellation
@@ -300,7 +465,10 @@ export default function NovaProductPage() {
             </div>
 
             {/* Purchase Action Section */}
-            <div className="mt-8 border-t border-white/8 pt-8">
+            <div
+              data-gsap-nova="cta"
+              className="mt-8 border-t border-white/8 pt-8"
+            >
               {/* Quantity Selector */}
               <div className="flex items-center justify-between mb-5">
                 <span className="font-sans text-xs uppercase tracking-[0.28em] text-titanium/80">
@@ -457,7 +625,10 @@ export default function NovaProductPage() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
+          <div
+            data-gsap-nova="architecture"
+            className="mt-14 grid gap-8 md:grid-cols-3"
+          >
             <div className="rounded-xl border border-white/8 bg-graphite/40 p-8 transition hover:border-white/20">
               <span className="font-mono text-xs text-lime">01 // TRANSDUCER</span>
               <h3 className="mt-4 font-serif text-2xl text-white">
@@ -499,7 +670,10 @@ export default function NovaProductPage() {
       </section>
 
       {/* Technical Specifications Section */}
-      <section className="border-t border-white/8 py-24">
+      <section
+        data-gsap-nova="specs"
+        className="border-t border-white/8 py-24"
+      >
         <div className="mx-auto max-w-7xl px-5 md:px-10">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
@@ -807,24 +981,137 @@ export default function NovaProductPage() {
         </div>
       </section>
 
-      {/* Storytelling Editorial Section */}
-      <section className="border-t border-white/8 bg-graphite/20 py-24">
-        <div className="mx-auto max-w-5xl px-5 text-center md:px-10">
+      {/* What's in the Box — Standalone Editorial Section */}
+      <section
+        data-gsap-nova="inbox"
+        className="border-t border-white/8 py-20"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-10">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+            <div>
+              <p className="font-sans text-[11px] uppercase tracking-[0.38em] text-lime">
+                Atelier Package
+              </p>
+              <h2 className="mt-3 font-serif text-3xl text-white sm:text-4xl">
+                What&apos;s in the Box
+              </h2>
+            </div>
+            <p className="text-xs text-titanium/60 max-w-xs">
+              Every NOVA ships with the complete atelier accessory set,
+              hand-inspected and calibrated before dispatch.
+            </p>
+          </div>
+
+          <div className="divide-y divide-white/8 border-y border-white/8">
+            {[
+              {
+                num: "01",
+                title: "AUREON NOVA Wireless Headphones",
+                desc: "The primary instrument. Closed-back reference-grade over-ear headphones sculpted in titanium and protein leather.",
+              },
+              {
+                num: "02",
+                title: "Custom Hard-Shell Carry Case",
+                desc: "Precision-molded ballistic travel case with magnetic cable containment dock and silk interior lining.",
+              },
+              {
+                num: "03",
+                title: "Braided 3.5mm Analog Cable (1.2m)",
+                desc: "Oxygen-free copper cable with gold-plated connectors for zero-latency studio passive listening.",
+              },
+              {
+                num: "04",
+                title: "USB-C Lossless Audio & Charge Cable (1.5m)",
+                desc: "Braided USB-C to USB-C cable enabling 24-bit / 96 kHz high-resolution DAC mode and rapid recharging.",
+              },
+              {
+                num: "05",
+                title: "Flight & Studio Adapters",
+                desc: "6.35mm (1/4-inch) gold-plated studio adapter and dual-prong airline cabin adapter.",
+              },
+              {
+                num: "06",
+                title: "Signed Certificate of Acoustic Calibration",
+                desc: "Individual laboratory testing document signed by the acoustic engineer, with serial-matched frequency response chart.",
+              },
+            ].map((item) => (
+              <div
+                key={item.num}
+                className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 py-6 group hover:bg-graphite/20 px-4 transition-colors"
+              >
+                <div className="flex items-baseline gap-6">
+                  <span className="font-mono text-[11px] text-lime/80 tracking-[0.3em] shrink-0">
+                    {`${item.num} //`}
+                  </span>
+                  <div>
+                    <h3 className="font-sans text-sm font-medium text-white tracking-wide">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-titanium/70 leading-relaxed max-w-2xl">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-titanium/40 shrink-0 self-start sm:self-center">
+                  Included
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Design Story — NOVA: Asymmetric Editorial */}
+      <section
+        data-gsap-nova="story"
+        className="border-t border-white/8 bg-gradient-to-b from-obsidian via-graphite/20 to-obsidian overflow-hidden"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-10 py-24 md:py-32">
+          {/* Top label */}
           <p className="font-sans text-[11px] uppercase tracking-[0.42em] text-lime">
             The Atelier Philosophy
           </p>
-          <blockquote className="mt-6 font-serif text-3xl italic text-white sm:text-5xl lg:text-6xl leading-tight">
-            &ldquo;In an age of synthetic saturation, NOVA was sculpted as an
-            heirloom instrument for purest silence.&rdquo;
-          </blockquote>
-          <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-titanium/80 sm:text-lg">
-            Conceived between Geneva and London, every radius of NOVA was
-            determined by how air pressure diffuses across acoustic chambers. By
-            pairing aerospace titanium with hand-buffed organic lacquers, we
-            rejected plastic resonance in favor of structural clarity. An
-            instrument that disappears on your head, expanding the soundstage
-            into infinity.
-          </p>
+
+          {/* Asymmetric layout: oversized quote mark + headline left / paragraph right */}
+          <div className="mt-10 grid md:grid-cols-2 gap-8 md:gap-16 items-start">
+            {/* Left: giant lime quote mark + headline */}
+            <div className="relative">
+              <span
+                className="pointer-events-none select-none font-serif text-[180px] leading-none text-lime/15 absolute -top-10 -left-6 md:-left-10 font-bold"
+                aria-hidden="true"
+              >
+                &ldquo;
+              </span>
+              <blockquote className="relative z-10 font-serif text-3xl sm:text-4xl lg:text-5xl text-white leading-tight italic pt-8">
+                In an age of synthetic saturation, NOVA was sculpted as an
+                heirloom instrument for purest silence.
+              </blockquote>
+            </div>
+
+            {/* Right: supporting editorial text with horizontal rule accents */}
+            <div className="flex flex-col justify-end pt-4 md:pt-16">
+              <div className="h-px w-12 bg-lime/60 mb-6" />
+              <p className="text-sm sm:text-base leading-relaxed text-titanium/80">
+                Conceived between Geneva and London, every radius of NOVA was
+                determined by how air pressure diffuses across acoustic chambers.
+                By pairing aerospace titanium with hand-buffed organic lacquers,
+                we rejected plastic resonance in favor of structural clarity.
+              </p>
+              <div className="h-px w-full bg-white/8 mt-8 mb-6" />
+              <p className="text-sm leading-relaxed text-titanium/60">
+                An instrument that disappears on your head, expanding the soundstage
+                into infinity.
+              </p>
+              <div className="mt-8">
+                <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-lime/80">
+                  — AUREON Atelier, Geneva
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom subtle divider */}
+          <div className="mt-16 h-px bg-gradient-to-r from-lime/40 via-white/10 to-transparent" />
         </div>
       </section>
 
@@ -892,4 +1179,3 @@ export default function NovaProductPage() {
     </div>
   );
 }
-

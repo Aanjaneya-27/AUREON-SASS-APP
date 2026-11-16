@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PulseProductViewerLazy } from "@/components/three/load-experiences";
 import { useCart } from "@/lib/cart-context";
 import { cn } from "@/lib/cn";
+import { getGsap } from "@/lib/gsap-client";
 import { PRODUCTS } from "@/lib/product-models";
 import { PULSE_COLORS, type PulseColor } from "@/lib/pulse-color-store";
 
 type SpecTab = "acoustics" | "connectivity" | "battery" | "craft" | "in_box";
 
 export default function PulseProductPage() {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [selectedColor, setSelectedColor] = useState<PulseColor>(
     PULSE_COLORS[0],
   );
@@ -48,10 +50,137 @@ export default function PulseProductPage() {
     openCart();
   }, [addItem, openCart, product.category, quantity, selectedColor]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const page = pageRef.current;
+    if (!page) return;
+
+    const { gsap } = getGsap();
+
+    const ctx = gsap.context(() => {
+      // Hero entrance animations
+      gsap.fromTo(
+        '[data-gsap-pulse="breadcrumb"]',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", delay: 0.1 },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="h1"]',
+        { opacity: 0, y: 30, scale: 1.03 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.9,
+          ease: "power3.out",
+          delay: 0.2,
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="price"]',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.3 },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="colors"]',
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.8, ease: "power3.out", delay: 0.4 },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="features"] > *',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          delay: 0.45,
+          stagger: 0.08,
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="cta"]',
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.5 },
+      );
+
+      // Scroll-triggered sections
+      gsap.fromTo(
+        '[data-gsap-pulse="architecture"] > *',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: '[data-gsap-pulse="architecture"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="specs"]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-pulse="specs"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="inbox"]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-pulse="inbox"]',
+            start: "top 85%",
+          },
+        },
+      );
+      gsap.fromTo(
+        '[data-gsap-pulse="story"]',
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: '[data-gsap-pulse="story"]',
+            start: "top 80%",
+          },
+        },
+      );
+    }, page);
+
+    return () => {
+      ctx.revert();
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-obsidian text-titanium selection:bg-lime/80 selection:text-obsidian">
+    <div
+      ref={pageRef}
+      className="min-h-screen bg-obsidian text-titanium selection:bg-lime/80 selection:text-obsidian"
+    >
       {/* Top Breadcrumb & Status Bar */}
-      <div className="border-b border-white/6 pt-24 pb-4 md:pt-28">
+      <div
+        data-gsap-pulse="breadcrumb"
+        className="border-b border-white/6 pt-24 pb-4 md:pt-28"
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 md:px-10">
           <nav
             aria-label="Breadcrumb"
@@ -74,13 +203,13 @@ export default function PulseProductPage() {
         </div>
       </div>
 
-      {/* Main Product Showcase Grid */}
+      {/* Main Product Showcase Grid (Balanced 6 / 6 Layout for Intimate Scale) */}
       <div className="mx-auto max-w-7xl px-5 py-8 md:px-10 md:py-14">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
-          {/* Left Column: 3D Product Gallery (lg:col-span-7) */}
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          {/* Left Column: 3D Product Gallery (lg:col-span-6) */}
           <section
             aria-label="3D Product Gallery"
-            className="flex flex-col lg:col-span-7"
+            className="flex flex-col lg:col-span-6"
           >
             {/* 3D Canvas Box */}
             <div className="group relative rounded-2xl border border-white/8 bg-gradient-to-b from-graphite/40 via-graphite/20 to-obsidian shadow-2xl backdrop-blur-sm overflow-hidden">
@@ -102,7 +231,7 @@ export default function PulseProductPage() {
               </div>
 
               {/* 3D Interactive Canvas */}
-              <div className="h-[460px] sm:h-[560px] lg:h-[640px] w-full">
+              <div className="h-[440px] sm:h-[520px] lg:h-[600px] w-full">
                 <PulseProductViewerLazy colorHex={selectedColor.hex} />
               </div>
 
@@ -129,7 +258,8 @@ export default function PulseProductPage() {
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-lime" />
                 <span className="font-sans text-[10px] uppercase tracking-[0.24em] text-titanium/60">
-                  Drag to rotate · Touch enabled · Click &lsquo;Open Case&rsquo; to inspect interior
+                  Drag to rotate · Touch enabled · Click &ldquo;Open Case&rdquo; to
+                  inspect interior
                 </span>
               </div>
               <Link
@@ -139,19 +269,43 @@ export default function PulseProductPage() {
                 View Full-Screen 3D Experience →
               </Link>
             </div>
+
+            {/* Editorial View Reference Strip */}
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {["Earbuds Open", "Case Closed", "Profile View", "Detail"].map(
+                (label, i) => (
+                  <div
+                    key={label}
+                    className="rounded border border-white/8 bg-graphite/30 py-3 text-center group hover:border-lime/40 transition-colors cursor-default"
+                  >
+                    <div className="h-6 w-6 mx-auto mb-2 rounded-full border border-white/15 bg-graphite/60 flex items-center justify-center">
+                      <span className="font-mono text-[8px] text-lime/80">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-titanium/50 group-hover:text-titanium/80 transition-colors">
+                      {label}
+                    </span>
+                  </div>
+                ),
+              )}
+            </div>
           </section>
 
-          {/* Right Column: Product Information & Purchase (lg:col-span-5) */}
+          {/* Right Column: Product Information & Purchase (lg:col-span-6) */}
           <section
             aria-label="Product Information"
-            className="flex flex-col justify-start lg:col-span-5"
+            className="flex flex-col justify-start lg:col-span-6"
           >
             {/* Header / Titles */}
             <div>
               <p className="font-sans text-[11px] uppercase tracking-[0.38em] text-lime font-medium">
                 AUREON ATELIER · NO. 02
               </p>
-              <h1 className="mt-2 font-serif text-4xl text-white tracking-tight sm:text-5xl lg:text-6xl">
+              <h1
+                data-gsap-pulse="h1"
+                className="mt-2 font-serif text-4xl text-white tracking-tight sm:text-5xl lg:text-6xl"
+              >
                 {product.name}
               </h1>
               <p className="mt-2 font-sans text-sm uppercase tracking-[0.28em] text-titanium/70">
@@ -180,7 +334,10 @@ export default function PulseProductPage() {
             </div>
 
             {/* Price & Allocation Status */}
-            <div className="mt-6 flex flex-wrap items-baseline justify-between gap-3">
+            <div
+              data-gsap-pulse="price"
+              className="mt-6 flex flex-wrap items-baseline justify-between gap-3"
+            >
               <div>
                 <p className="font-serif text-3xl text-white sm:text-4xl">
                   $550
@@ -207,7 +364,10 @@ export default function PulseProductPage() {
             </p>
 
             {/* Five Color Variants Swatch Picker */}
-            <div className="mt-8 rounded-xl border border-white/8 bg-graphite/30 p-5">
+            <div
+              data-gsap-pulse="colors"
+              className="mt-8 rounded-xl border border-white/8 bg-graphite/30 p-5"
+            >
               <div className="flex items-center justify-between">
                 <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-white">
                   Finish:{" "}
@@ -263,7 +423,10 @@ export default function PulseProductPage() {
             </div>
 
             {/* Key Audio Features Grid (6 Core Features) */}
-            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div
+              data-gsap-pulse="features"
+              className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2"
+            >
               <div className="rounded-lg border border-white/6 bg-graphite/20 p-3.5">
                 <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-lime">
                   Active Noise Cancellation
@@ -320,7 +483,10 @@ export default function PulseProductPage() {
             </div>
 
             {/* Purchase Action Section */}
-            <div className="mt-8 border-t border-white/8 pt-8">
+            <div
+              data-gsap-pulse="cta"
+              className="mt-8 border-t border-white/8 pt-8"
+            >
               {/* Quantity Selector */}
               <div className="flex items-center justify-between mb-5">
                 <span className="font-sans text-xs uppercase tracking-[0.28em] text-titanium/80">
@@ -477,7 +643,10 @@ export default function PulseProductPage() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
+          <div
+            data-gsap-pulse="architecture"
+            className="mt-14 grid gap-8 md:grid-cols-3"
+          >
             <div className="rounded-xl border border-white/8 bg-graphite/40 p-8 transition hover:border-white/20">
               <span className="font-mono text-xs text-lime">01 // TRANSDUCER</span>
               <h3 className="mt-4 font-serif text-2xl text-white">
@@ -518,7 +687,10 @@ export default function PulseProductPage() {
       </section>
 
       {/* Technical Specifications Section */}
-      <section className="border-t border-white/8 py-24">
+      <section
+        data-gsap-pulse="specs"
+        className="border-t border-white/8 py-24"
+      >
         <div className="mx-auto max-w-7xl px-5 md:px-10">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
@@ -826,23 +998,157 @@ export default function PulseProductPage() {
         </div>
       </section>
 
-      {/* Storytelling Editorial Section */}
-      <section className="border-t border-white/8 bg-graphite/20 py-24">
-        <div className="mx-auto max-w-5xl px-5 text-center md:px-10">
-          <p className="font-sans text-[11px] uppercase tracking-[0.42em] text-lime">
+      {/* What's in the Box — Standalone Editorial Section */}
+      <section
+        data-gsap-pulse="inbox"
+        className="border-t border-white/8 py-20"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-10">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+            <div>
+              <p className="font-sans text-[11px] uppercase tracking-[0.38em] text-lime">
+                Atelier Package
+              </p>
+              <h2 className="mt-3 font-serif text-3xl text-white sm:text-4xl">
+                What&apos;s in the Box
+              </h2>
+            </div>
+            <p className="text-xs text-titanium/60 max-w-xs">
+              The complete PULSE system, presented in AUREON&apos;s signature
+              matte packaging with individual quality inspection sign-off.
+            </p>
+          </div>
+
+          <div className="divide-y divide-white/8 border-y border-white/8">
+            {[
+              {
+                num: "01",
+                title: "AUREON PULSE Earbuds (Left & Right)",
+                desc: "The primary instruments. True wireless earbuds with 11mm graphene transducers and capacitive stem touch control surfaces.",
+              },
+              {
+                num: "02",
+                title: "Color-Matched Wireless Charging Pocket Case",
+                desc: "Impact-resistant matte polycarbonate case with magnetic closure, internal stainless steel hinge pin, and Qi wireless coil.",
+              },
+              {
+                num: "03",
+                title: "Ear Tip Assortment (4 Pairs)",
+                desc: "Hypoallergenic liquid silicone tips in XS, S, M, and L sizes, engineered for prolonged comfort and an acoustic airtight seal.",
+              },
+              {
+                num: "04",
+                title: "Braided USB-C Fast-Charging Cable",
+                desc: "High-durability reinforced braided USB-C to USB-C charging cable for rapid case and earbuds replenishment.",
+              },
+              {
+                num: "05",
+                title: "Soft Microfiber Travel Pouch",
+                desc: "Protective slip-case in obsidian microfiber designed to shield the charging case against scratches in travel.",
+              },
+              {
+                num: "06",
+                title: "Certificate of Acoustic Testing & Guide",
+                desc: "Individual laboratory testing document signed by the technician, plus quick pairing and gesture control manual.",
+              },
+            ].map((item) => (
+              <div
+                key={item.num}
+                className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 py-6 group hover:bg-graphite/20 px-4 transition-colors"
+              >
+                <div className="flex items-baseline gap-6">
+                  <span className="font-mono text-[11px] text-lime/80 tracking-[0.3em] shrink-0">
+                    {`${item.num} //`}
+                  </span>
+                  <div>
+                    <h3 className="font-sans text-sm font-medium text-white tracking-wide">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-titanium/70 leading-relaxed max-w-2xl">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-titanium/40 shrink-0 self-start sm:self-center">
+                  Included
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Design Story — PULSE: Two-Column Intimate Editorial */}
+      <section
+        data-gsap-pulse="story"
+        className="border-t border-white/8 bg-gradient-to-b from-obsidian via-graphite/20 to-obsidian overflow-hidden"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-10 py-24 md:py-32">
+          <p className="font-sans text-[11px] uppercase tracking-[0.42em] text-lime mb-10">
             The Atelier Philosophy
           </p>
-          <blockquote className="mt-6 font-serif text-3xl italic text-white sm:text-5xl lg:text-6xl leading-tight">
-            &ldquo;A ritual of extraction. Sound sculpted for your most private
-            spheres.&rdquo;
-          </blockquote>
-          <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-titanium/80 sm:text-lg">
-            We conceived PULSE as the sensory counterpart to NOVA. Where our
-            over-ear instrument envelops the architecture of your room, PULSE
-            slips seamlessly into your pocket, preserving the exact electro-acoustic
-            balance and tonal truth wherever life moves. Every opening click of
-            the case is an invitation back to total immersion.
-          </p>
+
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+            {/* Left column: editorial text — compact, intimate scale */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-lime/60" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-lime/80">
+                  PULSE · REFERENCE 02
+                </span>
+              </div>
+              <blockquote className="font-serif text-2xl sm:text-3xl text-white leading-snug italic mb-8">
+                &ldquo;A ritual of extraction. Sound sculpted for your most
+                private spheres.&rdquo;
+              </blockquote>
+              <div className="h-px w-full bg-white/8 my-6" />
+              <p className="text-sm leading-relaxed text-titanium/80 mb-5">
+                We conceived PULSE as the sensory counterpart to NOVA. Where our
+                over-ear instrument envelops the architecture of your room,
+                PULSE slips seamlessly into your pocket, preserving the exact
+                electro-acoustic balance and tonal truth wherever life moves.
+              </p>
+              <p className="text-sm leading-relaxed text-titanium/60">
+                Every opening click of the case is an invitation back to total
+                immersion.
+              </p>
+              <div className="flex items-center gap-3 mt-8">
+                <div className="h-px w-8 bg-white/20" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-titanium/50">
+                  — AUREON Atelier, London
+                </span>
+              </div>
+            </div>
+
+            {/* Right column: abstract CSS concentric circle visual (transducer / case geometry) */}
+            <div
+              className="flex items-center justify-center py-8 md:py-0"
+              aria-hidden="true"
+            >
+              <div className="relative w-56 h-56 md:w-72 md:h-72 flex items-center justify-center">
+                {/* Concentric circles suggesting earbud / case cross-section geometry */}
+                {[1, 0.78, 0.56, 0.36, 0.18].map((scale, i) => (
+                  <div
+                    key={i}
+                    className="absolute inset-0 rounded-full border border-white/[0.07] transition-all"
+                    style={{
+                      transform: `scale(${scale})`,
+                      borderColor:
+                        i === 4 ? "rgba(217, 255, 63, 0.35)" : undefined,
+                    }}
+                  />
+                ))}
+                {/* Inner core dot */}
+                <div className="h-3 w-3 rounded-full bg-lime/80 shadow-[0_0_12px_rgba(217,255,63,0.3)]" />
+                {/* Label */}
+                <div className="absolute -bottom-8 left-0 right-0 text-center">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-titanium/50">
+                    11mm Graphene Acoustic Core
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -910,4 +1216,3 @@ export default function PulseProductPage() {
     </div>
   );
 }
-

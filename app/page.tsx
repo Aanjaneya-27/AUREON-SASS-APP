@@ -5,6 +5,7 @@ import {
 } from "@/components/three/load-experiences";
 import { PRODUCTS } from "@/lib/product-models";
 import { HeroVideo } from "@/components/site/hero-video";
+import { CraftsmanshipSection } from "@/components/site/craftsmanship-section";
 
 export default function Home() {
   return (
@@ -12,10 +13,12 @@ export default function Home() {
       {/* Section 01: Cinematic Opening */}
       <HeroVideo />
 
-      {/* 3D Headphone Experience */}
+      {/* Section 02: (Scrolled-past transition) */}
+
+      {/* Section 03: NOVA 3D Experience */}
       <HeadphonesExperienceLazy />
 
-      {/* Technology Section 1: NOVA */}
+      {/* Section 04: NOVA Technology Intro */}
       <ProductIntro
         id="technology"
         kicker={PRODUCTS.headphones.category}
@@ -25,10 +28,10 @@ export default function Home() {
         cta="Study NOVA"
       />
 
-      {/* 3D Earbuds Experience */}
+      {/* Section 05: PULSE 3D Experience */}
       <EarbudsExperienceLazy />
 
-      {/* Technology Section 2: PULSE */}
+      {/* PULSE Technology Intro */}
       <ProductIntro
         kicker={PRODUCTS.earbuds.category}
         title={PRODUCTS.earbuds.tagline}
@@ -36,6 +39,9 @@ export default function Home() {
         href={PRODUCTS.earbuds.href}
         cta="Study PULSE"
       />
+
+      {/* Section 06: Materials & Craftsmanship */}
+      <CraftsmanshipSection />
     </div>
   );
 }
