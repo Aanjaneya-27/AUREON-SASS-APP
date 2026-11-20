@@ -22,4 +22,4 @@ Place real GLB models here (they are not included):
 - `public/models/aureon-headphones.glb`
 - `public/models/aureon-earbuds.glb`
 
-Until those files exist, each canvas shows a precise fallback with the expected path.
+Until those files exist, each canvas shows a precise fallb
