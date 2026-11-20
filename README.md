@@ -17,9 +17,6 @@ Open [http://localhost:3000](http://localhost:3000), then:
 
 ## Required 3D files
 
-Place real GLB models here (they are not included):
-
-- `public/models/aureon-headphones.glb`
+Place real GLB models here (they are not included
 - `public/models/aureon-earbuds.glb`
-
 Until those files exist, each canvas shows a precise fallb
